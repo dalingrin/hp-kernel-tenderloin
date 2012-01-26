@@ -183,6 +183,17 @@ config INPUT_ATI_REMOTE2
 	  To compile this driver as a module, choose M here: the module will be
 	  called ati_remote2.
 
+config INPUT_KEYCHORD
+	tristate "Key chord input driver support"
+	help
+	  Say Y here if you want to enable the key chord driver
+	  accessible at /dev/keychord.  This driver can be used
+	  for receiving notifications when client specified key
+	  combinations are pressed.
+
+	  To compile this driver as a module, choose M here: the
+	  module will be called keychord.
+
 config INPUT_KEYSPAN_REMOTE
 	tristate "Keyspan DMR USB remote control (EXPERIMENTAL)"
 	depends on EXPERIMENTAL
@@ -302,6 +313,11 @@ config INPUT_WINBOND_CIR
 	  To compile this driver as a module, choose M here: the module will be
 	  called winbond_cir.
 
+config INPUT_GPIO
+	tristate "GPIO driver support"
+	help
+	  Say Y here if you want to support gpio based keys, wheels etc...
+
 config HP_SDC_RTC
 	tristate "HP SDC Real Time Clock"
 	depends on (GSC || HP300) && SERIO
@@ -390,4 +406,84 @@ config INPUT_PCAP
 	  To compile this driver as a module, choose M here: the
 	  module will be called pcap_keys.
 
+config INPUT_ISL29023
+	tristate "light sensor support"
+	help
+	  Say Y here if you want support for the flip switch detection.
+	  This driver can be used with Qualcomm MSM7x30 based development
+	  platforms which have flip switch as part of the PMIC8058 keypad.
+
+	  To compile this driver as a module, choose M here: the
+	  module will be called kp_flip_switch.
+
+config PMIC8058_PWRKEY
+        tristate "PMIC8058 power key support"
+        default n
+        depends on PMIC8058
+        help
+          Say Y here if you want support for the PMIC8058 power key.
+
+          To compile this driver as a module, choose M here: the
+          module will be called pmic8058-pwrkey.
+
+config PMIC8058_OTHC
+        tristate "Qualcomm PMIC8058 OTHC support"
+        default n
+        depends on PMIC8058
+        help
+          Say Y here if you want support PMIC8058 OTHC.
+
+          To compile this driver as a module, choose M here: the
+          module will be called pmic8058-othc.
+
+config INPUT_PMIC8058_VIBRA_MEMLESS
+	tristate "Qualcomm PM8058 vibrator support (ff-memless)"
+	depends on PMIC8058 && INPUT_FF_MEMLESS
+	default n
+	help
+	  This option enables device driver support for the vibrator
+	  on Qualcomm PM8058 chip. This driver supports ff-memless interface
+	  from input framework.
+
+	  To compile this driver as module, choose M here: the
+	  module will be called pmic8058-vib-memless.
+
+config INPUT_LSM303_ACCEL
+	tristate "LSM303DLH 3-axis accelerometer driver"
+	depends on I2C
+	help
+	  Say Y here if you want to support the built-in LSM303DLH 3-axis accelerometer.
+
+	  To compile this driver as a module, choose M here: the
+	  module will be called lsm303dlh_acc.
+
+config INPUT_LSM303_MAGNE
+	tristate "LSM303DLH 3-axis magnetometer driver"
+	depends on I2C
+	help
+	  Say Y here if you want to support the built-in LSM303DLH 3-axis magnetometer.
+
+	  To compile this driver as a module, choose M here: the
+	  module will be called lsm303dlh_mag.
+
+config INPUT_HP_ECOMPASS
+	tristate "HP dummy eCompass driver"
+	default n
+	help
+	  Say Y here if you want to support HP eCompass Interface. 
+
+config INPUT_HP_GRAVITY_SENSOR
+	tristate "HP dummy gravity input device"
+	default n
+	help
+	  Say Y here if you want to support HP Gravity Interface. 
+	  
+config INPUT_CYPRESS_CY8C20236A
+	tristate "CYPRESS proximity sensor support"
+	default n
+	help
+	  Say Y here if you want support to proximity sensor.
+
+	  To compile this driver as a module, choose M here: the
+	  module will be called kp_flip_switch.
 endif

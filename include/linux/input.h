@@ -595,7 +595,7 @@ struct input_absinfo {
 #define KEY_NUMERIC_9		0x209
 #define KEY_NUMERIC_STAR	0x20a
 #define KEY_NUMERIC_POUND	0x20b
-
+#define KEY_CAMERA_SNAPSHOT	0x2fe
 #define KEY_CAMERA_FOCUS	0x210
 #define KEY_WPS_BUTTON		0x211	/* WiFi Protected Setup key */
 
@@ -727,6 +727,7 @@ struct input_absinfo {
 #define SW_CAMERA_LENS_COVER	0x09  /* set = lens covered */
 #define SW_KEYPAD_SLIDE		0x0a  /* set = keypad slide out */
 #define SW_FRONT_PROXIMITY	0x0b  /* set = front proximity sensor active */
+#define SW_HEADPHONE_NO_MIC_INSERT	0x0c
 #define SW_MAX			0x0f
 #define SW_CNT			(SW_MAX+1)
 

@@ -35,6 +35,34 @@ enum usb_otg_state {
 	OTG_STATE_A_VBUS_ERR,
 };
 
+enum usb_otg_event {
+	/* Device is not connected within
+	 * TA_WAIT_BCON or not responding.
+	 */
+	OTG_EVENT_DEV_CONN_TMOUT,
+	/* B-device returned STALL for
+	 * B_HNP_ENABLE feature request.
+	 */
+	OTG_EVENT_NO_RESP_FOR_HNP_ENABLE,
+	/* HUB class devices are not
+	 * supported.
+	 */
+	OTG_EVENT_HUB_NOT_SUPPORTED,
+	/* Device is not supported i.e
+	 * not listed in TPL.
+	 */
+	OTG_EVENT_DEV_NOT_SUPPORTED,
+	/* HNP failed due to
+	 * TA_AIDL_BDIS timeout or
+	 * TB_ASE0_BRST timeout
+	 */
+	OTG_EVENT_HNP_FAILED,
+	/* B-device did not detect VBUS
+	 * within TB_SRP_FAIL time.
+	 */
+	OTG_EVENT_NO_RESP_FOR_SRP,
+};
+
 enum usb_xceiv_events {
 	USB_EVENT_NONE,         /* no events or cable disconnected */
 	USB_EVENT_VBUS,         /* vbus valid event */
@@ -58,6 +86,10 @@ struct otg_transceiver;
 struct otg_io_access_ops {
 	int (*read)(struct otg_transceiver *otg, u32 reg);
 	int (*write)(struct otg_transceiver *otg, u32 val, u32 reg);
+#if defined(CONFIG_MACH_MSM8X60_TOPAZ) || defined(CONFIG_MACH_MSM8X60_OPAL)
+	int (*read_with_reset)(struct otg_transceiver *otg, u32 reg);
+	int (*write_with_reset)(struct otg_transceiver *otg, u32 val, u32 reg);
+#endif
 };
 
 /*
@@ -117,6 +149,10 @@ struct otg_transceiver {
 	/* start or continue HNP role switch */
 	int	(*start_hnp)(struct otg_transceiver *otg);
 
+	/* send events to user space */
+	int	(*send_event)(struct otg_transceiver *otg,
+			enum usb_otg_event event);
+
 };
 
 
@@ -153,6 +189,24 @@ static inline int otg_io_write(struct otg_transceiver *otg, u32 reg, u32 val)
 
 	return -EINVAL;
 }
+#if defined(CONFIG_MACH_MSM8X60_TOPAZ) || defined(CONFIG_MACH_MSM8X60_OPAL)
+static inline int otg_io_read_with_reset(struct otg_transceiver *otg, u32 reg)
+{
+	if (otg->io_ops && otg->io_ops->read_with_reset)
+		return otg->io_ops->read_with_reset(otg, reg);
+
+	return -EINVAL;
+}
+
+static inline int otg_io_write_with_reset(struct otg_transceiver *otg, u32 reg, u32 val)
+{
+	if (otg->io_ops && otg->io_ops->write_with_reset)
+		return otg->io_ops->write_with_reset(otg, reg, val);
+
+	return -EINVAL;
+}
+
+#endif
 
 static inline int
 otg_init(struct otg_transceiver *otg)
@@ -169,6 +223,10 @@ otg_shutdown(struct otg_transceiver *otg)
 	if (otg->shutdown)
 		otg->shutdown(otg);
 }
+
+/* for USB core, host and peripheral controller drivers */
+/* Context: can sleep */
+extern int otg_send_event(enum usb_otg_event event);
 
 /* for usb host and peripheral controller drivers */
 extern struct otg_transceiver *otg_get_transceiver(void);

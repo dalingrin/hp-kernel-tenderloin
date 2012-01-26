@@ -1,0 +1,5 @@
+linux (2.6.35-1.1) unstable; urgency=low
+
+  * Initial Debian packaging (headers only)
+
+ --  . <@>  Tue, 14 Sep 2010 11:35:00 -0600

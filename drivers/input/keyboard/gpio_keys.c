@@ -40,6 +40,14 @@ struct gpio_keys_drvdata {
 	unsigned int n_buttons;
 	struct gpio_button_data data[0];
 };
+//Levi 20101009 long press key add
+int GPIO_LONGPRESS_KEY = 40;
+int gpio_long_timer_set=0;
+int GPIO_LONGPRESS_CODE =KEY_MENU;
+int GPIO_LONGPRESS_CODE_2 =KEY_HOME;
+int GPIO_LONGPRESS_TIME=1000;
+int GPIO_LONGPRESS_TIME_2=4000;
+//Levi 20101009 long press key end
 
 /*
  * SYSFS interface for enabling/disabling keys and switches:
@@ -319,7 +327,57 @@ static void gpio_keys_report_event(struct gpio_button_data *bdata)
 	struct gpio_keys_button *button = bdata->button;
 	struct input_dev *input = bdata->input;
 	unsigned int type = button->type ?: EV_KEY;
+	int button_code=0;
 	int state = (gpio_get_value(button->gpio) ? 1 : 0) ^ button->active_low;
+//Levi 20101009 long press key add
+#if defined(CONFIG_MACH_MSM8X60_TOPAZ) || defined(CONFIG_MACH_MSM8X60_OPAL)
+    if(button->gpio==GPIO_LONGPRESS_KEY)
+    {
+        if(state==1)
+        {
+            if(gpio_long_timer_set==2)
+            {
+                input_event(input, type, GPIO_LONGPRESS_CODE_2, !!state);                
+                input_sync(input);
+                gpio_long_timer_set =0;
+            }else if(gpio_long_timer_set==1)
+            {
+                mod_timer(&bdata->timer,
+		        jiffies + msecs_to_jiffies(GPIO_LONGPRESS_TIME_2));     
+                gpio_long_timer_set =2;
+
+            }else{
+                mod_timer(&bdata->timer,
+		        jiffies + msecs_to_jiffies(GPIO_LONGPRESS_TIME));     
+                gpio_long_timer_set =1;
+            }
+        }else{
+            if(timer_pending(&bdata->timer))
+            {
+                del_timer(&bdata->timer);
+                if(gpio_long_timer_set==1)
+                {
+                    button_code=button->code; //KEY_BACK
+                }else if(gpio_long_timer_set==2)
+                {
+                    button_code=GPIO_LONGPRESS_CODE;
+                }                
+                input_event(input, type, button_code, 1);         
+                input_sync(input);
+                input_event(input, type, button_code, 0);
+                input_sync(input);
+            }else
+            {
+                input_event(input, type, GPIO_LONGPRESS_CODE_2, !!state);
+                input_sync(input);
+            } 
+            gpio_long_timer_set=0;
+        }
+        return;
+    }
+
+#endif
+//Levi 20101009 long press key end
 
 	input_event(input, type, button->code, !!state);
 	input_sync(input);
@@ -392,6 +450,7 @@ static int __devinit gpio_keys_setup_key(struct platform_device *pdev,
 	}
 
 	irqflags = IRQF_TRIGGER_RISING | IRQF_TRIGGER_FALLING;
+// End
 	/*
 	 * If platform has specified that the button can be disabled,
 	 * we don't want it to share the interrupt line.
@@ -399,7 +458,16 @@ static int __devinit gpio_keys_setup_key(struct platform_device *pdev,
 	if (!button->can_disable)
 		irqflags |= IRQF_SHARED;
 
+	{
+// Added by HP Wade Wang for PMIC8058 GPIO irq PIN
+	struct irq_desc *irq_desc;
+	irq_desc = irq_to_desc(irq);
+	if (irq_desc && irq_desc->status & IRQ_NESTED_THREAD)
+		error = request_threaded_irq(irq, NULL, gpio_keys_isr, irqflags, desc, bdata);
+	else
+// end
 	error = request_irq(irq, gpio_keys_isr, irqflags, desc, bdata);
+	}	
 	if (error) {
 		dev_err(dev, "Unable to claim irq %d; error %d\n",
 			irq, error);
@@ -468,6 +536,10 @@ static int __devinit gpio_keys_probe(struct platform_device *pdev)
 			wakeup = 1;
 
 		input_set_capability(input, type, button->code);
+        if(button->gpio==GPIO_LONGPRESS_KEY){      //Levi 20101009 long press key       
+		    input_set_capability(input, type, GPIO_LONGPRESS_CODE);
+		    input_set_capability(input, type, GPIO_LONGPRESS_CODE_2);
+        }
 	}
 
 	error = sysfs_create_group(&pdev->dev.kobj, &gpio_keys_attr_group);

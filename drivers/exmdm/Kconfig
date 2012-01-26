@@ -1,0 +1,37 @@
+menuconfig NEW_EXMDM
+	bool "External Modem Control Support"
+	help
+	  Say Y to enable Linux external modem control support.
+	  This allows control of supported external modem from
+	  both userspace and optionally, by kernel events (triggers).
+
+if NEW_EXMDM
+
+config EXMDM_CLASS
+	bool "External Modem Control Class Support"
+	help
+	  This option enables the external modem sysfs class in
+	  /sys/class/exmdm. You will need this to do anything useful
+	  with external modem. If unsure, say N.
+
+comment "External Modem Control drivers"
+
+config EXMDM_STE_U300
+	bool "External Modem Control Support for STE U300"
+	select EXMDM_CLASS
+	help
+	  This option enables support for STE U300.
+
+config EXMDM_HUAWEI_820U
+	bool "External Modem Control Support for Huawei 820u"
+	select EXMDM_CLASS
+	help
+	  This option enables support for external modem Huawei 820u.
+
+config EXMDM_SIERRA_8705
+	bool "External Modem Control Support for Sierra 8705"
+	select EXMDM_CLASS
+	help
+	  This option enables support for external modem Sierra 8705.
+
+endif # NEW_EXMDM

@@ -1,0 +1,26 @@
+config AR6003
+	tristate "Atheros 6003 (802.11n) wireless cards support"
+	depends on WIRELESS_EXT && MMC
+	---help---
+	  This module adds support for wireless adapters based on
+	  Atheros 6003 chipset.
+
+	  This driver uses the kernel's wireless extensions subsystem.
+
+	  Say M if unsure.
+
+config AR6003_FW_PATH
+	depends on AR6003
+	string "Firmware path"
+	default "/system/etc/firmware/fw_ar6003.bin"
+	---help---
+	  Path to the firmware file.
+
+config AR6003_NVRAM_PATH
+	depends on AR6003
+	string "NVRAM path"
+	default "/proc/calibration"
+	---help---
+	  Path to the calibration file.
+
+

@@ -88,6 +88,8 @@ source "drivers/memstick/Kconfig"
 
 source "drivers/leds/Kconfig"
 
+source "drivers/switch/Kconfig"
+
 source "drivers/accessibility/Kconfig"
 
 source "drivers/infiniband/Kconfig"
@@ -111,4 +113,13 @@ source "drivers/xen/Kconfig"
 source "drivers/staging/Kconfig"
 
 source "drivers/platform/Kconfig"
+
+source "drivers/exmdm/Kconfig"
+
+menu "NFC device support"
+config NFC
+	boolean "NFC driver support"
+	default y
+endmenu
+	
 endmenu

@@ -93,6 +93,12 @@ struct wm8994_pdata {
         /* Jack detect threashold levels, see datasheet for values */
         unsigned int jd_scthr:2;
         unsigned int jd_thr:2;
+
+	 int gpio_ldo1_enable;
+	 int gpio_ldo2_enable; 
+	 unsigned int (*wm8994_setup)(void);
+	 void (*wm8994_shutdown)(void);
+	 int (*wm8994_get_boardtype)(void);
 };
 
 #endif

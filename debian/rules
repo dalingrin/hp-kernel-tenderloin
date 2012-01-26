@@ -1,0 +1,105 @@
+#!/usr/bin/make -f
+# -*- makefile -*-
+
+# Uncomment this to turn on verbose mode.
+#export DH_VERBOSE=1
+
+KERNEL_ABI ?= 2.6.35-1
+SANITIZED_KERNEL_HEADERS ?= /usr/local/include
+
+hdrs_pkg_name := linux-headers-$(KERNEL_ABI)
+hdrs_pkg_dir  := $(CURDIR)/debian/$(hdrs_pkg_name)/usr/src/$(hdrs_pkg_name)
+
+sanitized_pkg_name := sanitized-linux-headers
+sanitized_pkg_dir  := $(CURDIR)/debian/$(sanitized_pkg_name)
+sanitized_tmp_dir  := $(CURDIR)/debian/tmp-headers
+
+configure: configure-stamp
+configure-stamp:
+	dh_testdir
+	# Ensure the kernel is configured
+	@test -e .config || (                           \
+	echo;                                           \
+	echo "  ERROR: Kernel hasn't been configured."; \
+	echo;                                           \
+	/bin/false)
+	touch configure-stamp
+
+build: build-stamp
+build-stamp: configure-stamp
+	dh_testdir
+	$(MAKE) modules_prepare
+	touch $@
+
+clean:
+	dh_testdir
+	dh_testroot
+	rm -f build-stamp configure-stamp
+	$(MAKE) clean
+	dh_clean
+
+install: build
+	dh_testdir
+	dh_testroot
+	dh_prep
+	dh_installdirs
+
+	find . -path './debian' -prune -o -path './$(DEBIAN)' -prune \
+	  -o -path './include/*' -prune \
+	  -o -path './scripts/*' -prune -o -type f \
+	  \( -name 'Makefile*' -o -name 'Kconfig*' -o -name 'Kbuild*' -o \
+	     -name '*.sh' -o -name '*.pl' -o -name '*.lds' \) \
+	  -print | cpio -pd --preserve-modification-time $(hdrs_pkg_dir)
+	cp -a drivers/media/dvb/dvb-core/*.h $(hdrs_pkg_dir)/drivers/media/dvb/dvb-core
+	cp -a drivers/media/video/*.h $(hdrs_pkg_dir)/drivers/media/video
+	cp -a drivers/media/dvb/frontends/*.h $(hdrs_pkg_dir)/drivers/media/dvb/frontends
+	cp -a scripts include $(hdrs_pkg_dir)
+	(find arch -name include -type d -print | \
+		xargs -n1 -i: find : -type f) | \
+		cpio -pd --preserve-modification-time $(hdrs_pkg_dir)
+
+
+	$(MAKE) INSTALL_HDR_PATH=$(sanitized_tmp_dir)/install headers_install
+	(cd $(sanitized_tmp_dir)/install/include/ && \
+		find . -name '.' -o -name '.*' -prune -o -print | \
+		cpio -pd --preserve-modification-time \
+			$(sanitized_pkg_dir)/$(SANITIZED_KERNEL_HEADERS))
+	rm -rf $(sanitized_tmp_dir)
+
+# Build architecture-independent files here.
+binary-indep: install
+# We have nothing to do by default.
+
+# Build architecture-dependent files here.
+binary-arch: install
+	dh_testdir
+	dh_testroot
+	dh_installchangelogs
+	dh_installdocs
+	dh_installexamples
+#	dh_install
+#	dh_installmenu
+#	dh_installdebconf
+#	dh_installlogrotate
+#	dh_installemacsen
+#	dh_installpam
+#	dh_installmime
+#	dh_installinit
+#	dh_installcron
+#	dh_installinfo
+	dh_installman
+	dh_link
+	dh_strip
+	dh_compress
+	dh_fixperms
+#	dh_perl
+#	dh_python
+#	dh_makeshlibs
+	dh_installdeb
+	dh_shlibdeps
+	dh_gencontrol
+	dh_md5sums
+	dh_builddeb
+
+binary: binary-indep binary-arch
+.PHONY: build clean binary-indep binary-arch binary install configure

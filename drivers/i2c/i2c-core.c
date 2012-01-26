@@ -491,6 +491,13 @@ i2c_new_device(struct i2c_adapter *adap, struct i2c_board_info const *info)
 	dev_dbg(&adap->dev, "client [%s] registered with bus id %s\n",
 		client->name, dev_name(&client->dev));
 
+	/*
+	 Zhs<20101224>Set the device's power.runtime_status to RPM_ACTIVE. if we don't set it, the I2C driver's
+	 suspend function can not be called because the BUS suspend function(i2c_device_pm_suspend) would check 
+	 the device's power.runtime_status to call driver's suspend function
+	*/
+	pm_runtime_set_active(&client->dev);
+
 	return client;
 
 out_err:

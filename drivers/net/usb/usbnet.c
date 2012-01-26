@@ -580,6 +580,10 @@ static int unlink_urbs (struct usbnet *dev, struct sk_buff_head *q)
 		entry = (struct skb_data *) skb->cb;
 		urb = entry->urb;
 
+		// HP Wade: Workaround for deadlock issue because ISP1763a EHCI did not support unlink_async
+		spin_unlock_irqrestore (&q->lock, flags);
+		// end
+
 		// during some PM-driven resume scenarios,
 		// these (async) unlinks complete immediately
 		retval = usb_unlink_urb (urb);
@@ -587,6 +591,11 @@ static int unlink_urbs (struct usbnet *dev, struct sk_buff_head *q)
 			netdev_dbg(dev->net, "unlink urb err, %d\n", retval);
 		else
 			count++;
+
+		// HP Wade: Workaround for deadlock issue because ISP1763a EHCI did not support unlink_async
+		spin_lock_irqsave (&q->lock, flags);
+		// end
+
 	}
 	spin_unlock_irqrestore (&q->lock, flags);
 	return count;
@@ -1395,6 +1404,7 @@ usbnet_probe (struct usb_interface *udev, const struct usb_device_id *prod)
 		   dev->driver_info->description,
 		   net->dev_addr);
 
+	device_init_wakeup(&xdev->dev, 1);
 	// ok, it's ready to go.
 	usb_set_intfdata (udev, dev);
 

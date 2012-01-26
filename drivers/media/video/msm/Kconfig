@@ -1,0 +1,126 @@
+comment "Camera Sensor Selection"
+config MT9T013
+	bool "Sensor mt9t013 (BAYER 3M)"
+	depends on MSM_CAMERA && !ARCH_MSM8X60
+	default y
+	---help---
+	  MICRON 3M Bayer Sensor with AutoFocus
+
+config MT9D112
+	bool "Sensor mt9d112 (YUV 2M)"
+	depends on MSM_CAMERA && !ARCH_MSM8X60
+	default y
+	---help---
+	  MICRON 2M YUV Sensor
+config IMX074
+	bool "Sensor IMX074 (BAYER 13.5M)"
+	depends on MSM_CAMERA && ARCH_MSM8X60
+	default y
+	---help---
+	SONY 13.5 MP Bayer Sensor
+config WEBCAM_OV7692
+	bool "Sensor OV7692 (VGA YUV)"
+	depends on MSM_CAMERA && ARCH_MSM8X60
+	default y
+	---help---
+	  Omni Vision VGA YUV Sensor.
+#	This Senosr is used as a webcam.
+#	This uses the CSI interface.
+#	Need to enable CSI1 clks for this sensor.
+config WEBCAM_MT9M113
+	bool "Sensor MT9M113 (1.3M YUV)"
+	depends on MSM_CAMERA && ARCH_MSM8X60
+	default y
+	---help---
+	  Aptina 1.3M YUV Sensor.
+#	This Senosr is used as a webcam.
+#	This uses the CSI interface.
+#	Need to enable CSI1 clks for this sensor.
+config VX6953
+	bool "Sensor VX6953 (BAYER 5M)"
+	depends on MSM_CAMERA && ARCH_MSM8X60
+	default y
+	---help---
+	STM 5M Bayer Sensor with EDOF
+config SN12M0PZ
+	bool "Sensor sn12m0pz (Bayer 12 MP)"
+	depends on MSM_CAMERA && ARCH_MSM7X30
+	default y
+	---help---
+	  Sony 12 MP Bayer Sensor
+config MT9P012
+	bool "Sensor mt9p012 (BAYER 5M)"
+	depends on MSM_CAMERA && !ARCH_MSM8X60
+	default y
+	---help---
+	  MICRON 5M Bayer Sensor with Autofocus
+
+choice
+	prompt "AF module"
+	depends on MT9P012 && !ARCH_MSM8X60
+	default MSM_CAMERA_AF_FOXCONN
+
+config MSM_CAMERA_AF_FOXCONN
+	bool "FOXCONN Module"
+	help
+	  This driver supports FOXCONN AF module for 5M Bayer sensor
+
+config MSM_CAMERA_AF_BAM
+	bool "BAM Module"
+	help
+	  This driver supports BAM AF module for 5M Bayer sensor
+
+endchoice
+
+config MT9P012_KM
+	bool "Sensor mt9p012 KM module (BAYER 5M)"
+	depends on MSM_CAMERA && !ARCH_MSM8X60
+	default y
+	---help---
+	  MICRON 5M Bayer Sensor KM modules with Autofocus
+
+config S5K3E2FX
+	bool "Sensor s5k3e2fx (Samsung 5M)"
+	depends on MSM_CAMERA && !ARCH_MSM8X60
+	default y
+	---help---
+	  Samsung 5M with Autofocus
+
+config VB6801
+	bool "Sensor vb6801"
+	depends on MSM_CAMERA && !ARCH_MSM8X60
+	---help---
+	  5M with flash
+
+config MSM_CAMERA_FLASH
+	bool "Qualcomm MSM camera flash support"
+	depends on MSM_CAMERA
+	default y
+	---help---
+	  Enable support for LED flash for msm camera
+
+config MSM_GEMINI
+	tristate "Qualcomm MSM Gemini Jpeg Engine support"
+	depends on MSM_CAMERA && (ARCH_MSM7X30 || ARCH_MSM8X60)
+	default M
+	---help---
+	  Enable support for Gemini Jpeg Engine
+
+config MSM_VPE
+	tristate "Qualcomm MSM Video Pre-processing Engine support"
+	depends on MSM_CAMERA && (ARCH_MSM7X30 || ARCH_MSM8X60)
+	default y
+	---help---
+	  Enable support for Video Pre-processing Engine
+
+config QUP_EXCLUSIVE_TO_CAMERA
+	bool "QUP exclusive to camera"
+	depends on MSM_CAMERA
+	default y
+	---help---
+	  This flag enabled states that QUP
+	  is exclusive to camera. In case this
+	  is disabled, the lvs1 voltage is enabled
+	  by QUP in the board file as QUP is used by
+	  applications other than camera.
+
